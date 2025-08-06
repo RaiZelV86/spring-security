@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>Profile</title></head>
+<body>
+<h2>Personal account</h2>
+
+<p><b>Surname:</b> <span th:text="${client.userName}"></span></p>
+<p><b>Lastname:</b> <span th:text="${client.lastName}"></span></p>
+<p><b>Email:</b> <span th:text="${client.email}"></span></p>
+<p><b>Age:</b> <span th:text="${client.age}"></span></p>
+
+<form th:action="@{/logout}" method="post">
+  <button type="submit">Exit</button>
+</form>
+</body>
+</html>

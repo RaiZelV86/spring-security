@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>Admin</title></head>
+<body>
+<h2 th:text="${title}">Admin</h2>
+
+<a th:href="@{/clients}">Client management</a>
+
+<form th:action="@{/logout}" method="post">
+  <button type="submit">Exit</button>
+</form>
+</body>
+</html>
