@@ -1,4 +1,4 @@
-package com.security.SpringSecurity;
+package com.security.SpringSecurity.config;
 
 import com.security.SpringSecurity.model.Client;
 import com.security.SpringSecurity.repository.ClientRepository;

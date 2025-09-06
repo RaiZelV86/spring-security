@@ -68,7 +68,7 @@
                     </div>
                     
                     <div class="table-responsive">
-                        <table class="table table-striped">
+                        <table id="clientsTable" class="table table-striped">
                             <thead class="table-light">
                                 <tr>
                                     <th>ID</th>
@@ -80,19 +80,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr th:each="client : ${clients}">
-                                    <td th:text="${client.id}"></td>
-                                    <td th:text="${client.userName}"></td>
-                                    <td th:text="${client.lastName}"></td>
-                                    <td th:text="${client.email}"></td>
-                                    <td th:text="${client.age}"></td>
-                                    <td>
-                                        <a th:href="@{'/clients/edit/' + ${client.id}}" class="btn btn-primary btn-sm">Edit</a>
-                                        <a th:href="@{'/clients/delete/' + ${client.id}}" 
-                                           class="btn btn-danger btn-sm"
-                                           onclick="return confirm('Are you sure you want to delete this client?')">Delete</a>
-                                    </td>
-                                </tr>
+                                <!-- Данные будут загружены через JavaScript -->
                             </tbody>
                         </table>
                     </div>
@@ -102,5 +90,130 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Глобальные переменные
+        let clients = [];
+
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            loadClients();
+        });
+
+        // Загрузка списка клиентов
+        async function loadClients() {
+            try {
+                const response = await fetch('/api/clients');
+                if (response.ok) {
+                    clients = await response.json();
+                    renderClientsTable();
+                } else {
+                    showAlert('Ошибка загрузки клиентов', 'danger');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showAlert('Ошибка загрузки клиентов', 'danger');
+            }
+        }
+
+        // Рендеринг таблицы клиентов
+        function renderClientsTable() {
+            const tbody = document.querySelector('#clientsTable tbody');
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
+
+            clients.forEach(client => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${client.id}</td>
+                    <td>${client.userName}</td>
+                    <td>${client.lastName}</td>
+                    <td>${client.email}</td>
+                    <td>${client.age}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="editClient(${client.id})">Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteClient(${client.id})">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Редактирование клиента (перенаправление на admin страницу)
+        function editClient(id) {
+            window.location.href = `/admin#edit-${id}`;
+        }
+
+        // Удаление клиента
+        async function deleteClient(id) {
+            if (!confirm('Are you sure you want to delete this client?')) {
+                return;
+            }
+
+            try {
+                console.log('Удаляем клиента с ID:', id);
+                const response = await fetch(`/api/clients/${id}`, {
+                    method: 'DELETE'
+                });
+
+                console.log('Статус ответа при удалении:', response.status);
+                
+                if (response.ok) {
+                    showAlert('Клиент удален успешно', 'success');
+                    loadClients();
+                } else {
+                    let errorMessage = `Ошибка удаления клиента (статус: ${response.status})`;
+                    try {
+                        const errorText = await response.text();
+                        console.log('Ошибка удаления:', errorText);
+                        if (errorText) {
+                            errorMessage += `: ${errorText}`;
+                        }
+                    } catch (e) {
+                        console.log('Не удалось прочитать текст ошибки');
+                    }
+                    
+                    if (response.status === 403) {
+                        errorMessage = 'У вас нет прав для удаления клиентов';
+                    } else if (response.status === 404) {
+                        errorMessage = 'Клиент не найден';
+                    } else if (response.status === 500) {
+                        errorMessage = 'Внутренняя ошибка сервера при удалении клиента';
+                    }
+                    
+                    showAlert(errorMessage, 'danger');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showAlert('Ошибка удаления клиента: ' + error.message, 'danger');
+            }
+        }
+
+        // Показ уведомлений
+        function showAlert(message, type) {
+            // Удаляем существующие уведомления
+            const existingAlerts = document.querySelectorAll('.alert');
+            existingAlerts.forEach(alert => alert.remove());
+
+            // Создаем новое уведомление
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            // Вставляем уведомление в начало контента
+            const contentCard = document.querySelector('.content-card');
+            contentCard.insertBefore(alertDiv, contentCard.firstChild);
+
+            // Автоматически скрываем через 5 секунд
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+    </script>
 </body>
 </html>

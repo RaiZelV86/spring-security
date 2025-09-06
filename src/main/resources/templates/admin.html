@@ -87,7 +87,7 @@
                         <div class="tab-pane fade show active" id="all-users" role="tabpanel">
                             <h4 class="mb-3">All Users</h4>
                             <div class="table-responsive">
-                                <table class="table table-striped">
+                                <table id="clientsTable" class="table table-striped">
                                     <thead class="table-light">
                                         <tr>
                                             <th>ID</th>
@@ -101,22 +101,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr th:each="client : ${clients}">
-                                            <td th:text="${client.id}"></td>
-                                            <td th:text="${client.userName}"></td>
-                                            <td th:text="${client.lastName}"></td>
-                                            <td th:text="${client.age}"></td>
-                                            <td th:text="${client.email}"></td>
-                                            <td th:text="${client.roles}"></td>
-                                            <td>
-                                                <a th:href="@{'/clients/edit/' + ${client.id}}" class="btn btn-primary btn-sm">Edit</a>
-                                            </td>
-                                            <td>
-                                                <a th:href="@{'/clients/delete/' + ${client.id}}" 
-                                                   class="btn btn-danger btn-sm"
-                                                   onclick="return confirm('Are you sure you want to delete this user?')">Delete</a>
-                                            </td>
-                                        </tr>
+                                        <!-- Данные будут загружены через JavaScript -->
                                     </tbody>
                                 </table>
                             </div>
@@ -124,45 +109,41 @@
                         
                         <div class="tab-pane fade" id="new-user" role="tabpanel">
                             <h4 class="mb-3">Add new user</h4>
-                            <form th:action="@{/clients/save}" th:object="${newClient}" method="post" class="row g-3">
-                                <input type="hidden" th:field="*{id}" />
-                                
+                            <form id="clientForm" class="row g-3">
                                 <div class="col-md-6">
                                     <label for="userName" class="form-label">First Name</label>
-                                    <input type="text" class="form-control" id="userName" th:field="*{userName}" required>
+                                    <input type="text" class="form-control" id="userName" name="userName" required>
                                 </div>
                                 
                                 <div class="col-md-6">
                                     <label for="lastName" class="form-label">Last Name</label>
-                                    <input type="text" class="form-control" id="lastName" th:field="*{lastName}" required>
+                                    <input type="text" class="form-control" id="lastName" name="lastName" required>
                                 </div>
                                 
                                 <div class="col-md-6">
                                     <label for="age" class="form-label">Age</label>
-                                    <input type="number" class="form-control" id="age" th:field="*{age}" required>
+                                    <input type="number" class="form-control" id="age" name="age" required>
                                 </div>
                                 
                                 <div class="col-md-6">
                                     <label for="email" class="form-label">Email</label>
-                                    <input type="email" class="form-control" id="email" th:field="*{email}" required>
+                                    <input type="email" class="form-control" id="email" name="email" required>
                                 </div>
                                 
                                 <div class="col-md-6">
                                     <label for="password" class="form-label">Password</label>
-                                    <input type="password" class="form-control" id="password" th:field="*{password}" required>
+                                    <input type="password" class="form-control" id="password" name="password" required>
                                 </div>
                                 
                                 <div class="col-md-6">
                                     <label for="role" class="form-label">Role</label>
                                     <select class="form-select" id="role" name="role" required>
                                         <option value="">Select role</option>
-                                        <option value="ROLE_ADMIN">ADMIN</option>
-                                        <option value="ROLE_USER">USER</option>
                                     </select>
                                 </div>
                                 
                                 <div class="col-12">
-                                    <button type="submit" class="btn btn-success">Add new user</button>
+                                    <button type="submit" class="btn btn-success" id="submitBtn">Add new user</button>
                                 </div>
                             </form>
                         </div>
@@ -173,5 +154,298 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Глобальные переменные
+        let clients = [];
+        let roles = [];
+        let editingClientId = null;
+
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            loadClients();
+            loadRoles();
+            setupEventListeners();
+            handleUrlHash();
+        });
+
+        // Загрузка списка клиентов
+        async function loadClients() {
+            try {
+                const response = await fetch('/api/clients');
+                if (response.ok) {
+                    clients = await response.json();
+                    renderClientsTable();
+                } else {
+                    showAlert('Ошибка загрузки клиентов', 'danger');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showAlert('Ошибка загрузки клиентов', 'danger');
+            }
+        }
+
+        // Загрузка ролей
+        async function loadRoles() {
+            try {
+                const response = await fetch('/api/clients/roles');
+                if (response.ok) {
+                    roles = await response.json();
+                    populateRoleSelect();
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки ролей:', error);
+            }
+        }
+
+        // Настройка обработчиков событий
+        function setupEventListeners() {
+            // Обработчик формы добавления/редактирования клиента
+            const clientForm = document.getElementById('clientForm');
+            if (clientForm) {
+                clientForm.addEventListener('submit', handleClientSubmit);
+            }
+
+            // Обработчик кнопки "Add new user"
+            const newUserTab = document.getElementById('new-user-tab');
+            if (newUserTab) {
+                newUserTab.addEventListener('click', function() {
+                    resetForm();
+                });
+            }
+        }
+
+        // Обработка хеша в URL для редактирования
+        function handleUrlHash() {
+            const hash = window.location.hash;
+            if (hash && hash.startsWith('#edit-')) {
+                const clientId = parseInt(hash.replace('#edit-', ''));
+                if (!isNaN(clientId)) {
+                    // Ждем загрузки данных, затем редактируем
+                    setTimeout(() => {
+                        editClient(clientId);
+                    }, 500);
+                }
+            }
+        }
+
+        // Рендеринг таблицы клиентов
+        function renderClientsTable() {
+            const tbody = document.querySelector('#clientsTable tbody');
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
+
+            clients.forEach(client => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${client.id}</td>
+                    <td>${client.userName}</td>
+                    <td>${client.lastName}</td>
+                    <td>${client.age}</td>
+                    <td>${client.email}</td>
+                    <td>${client.roles.map(role => role.name).join(', ')}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="editClient(${client.id})">Edit</button>
+                    </td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" onclick="deleteClient(${client.id})">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Заполнение селекта ролей
+        function populateRoleSelect() {
+            const roleSelect = document.getElementById('role');
+            if (!roleSelect) return;
+
+            roleSelect.innerHTML = '<option value="">Select role</option>';
+            roles.forEach(role => {
+                const option = document.createElement('option');
+                option.value = role.name;
+                option.textContent = role.name;
+                roleSelect.appendChild(option);
+            });
+        }
+
+        // Обработка отправки формы
+        async function handleClientSubmit(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(event.target);
+            const clientData = {
+                userName: formData.get('userName'),
+                lastName: formData.get('lastName'),
+                age: parseInt(formData.get('age')),
+                email: formData.get('email'),
+                password: formData.get('password'),
+                roles: []
+            };
+
+            // Добавляем роль если выбрана
+            const selectedRole = formData.get('role');
+            if (selectedRole) {
+                const role = roles.find(r => r.name === selectedRole);
+                if (role) {
+                    clientData.roles = [role];
+                }
+            }
+
+            try {
+                let response;
+                if (editingClientId) {
+                    // Обновление существующего клиента
+                    response = await fetch(`/api/clients/${editingClientId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(clientData)
+                    });
+                } else {
+                    // Создание нового клиента
+                    response = await fetch('/api/clients', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(clientData)
+                    });
+                }
+
+                if (response.ok) {
+                    showAlert(editingClientId ? 'Клиент обновлен успешно' : 'Клиент создан успешно', 'success');
+                    resetForm();
+                    loadClients();
+                    // Переключаемся на вкладку "All Users"
+                    const allUsersTab = new bootstrap.Tab(document.getElementById('all-users-tab'));
+                    allUsersTab.show();
+                } else {
+                    showAlert('Ошибка сохранения клиента', 'danger');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showAlert('Ошибка сохранения клиента', 'danger');
+            }
+        }
+
+        // Редактирование клиента
+        function editClient(id) {
+            const client = clients.find(c => c.id === id);
+            if (!client) return;
+
+            editingClientId = id;
+            
+            // Заполняем форму данными клиента
+            document.getElementById('userName').value = client.userName;
+            document.getElementById('lastName').value = client.lastName;
+            document.getElementById('age').value = client.age;
+            document.getElementById('email').value = client.email;
+            document.getElementById('password').value = '';
+            document.getElementById('password').required = false;
+            
+            // Устанавливаем роль
+            if (client.roles && client.roles.length > 0) {
+                document.getElementById('role').value = client.roles[0].name;
+            }
+
+            // Обновляем текст кнопки
+            const submitBtn = document.getElementById('submitBtn');
+            if (submitBtn) {
+                submitBtn.textContent = 'Update User';
+                submitBtn.className = 'btn btn-warning';
+            }
+
+            // Переключаемся на вкладку "New User"
+            const newUserTab = new bootstrap.Tab(document.getElementById('new-user-tab'));
+            newUserTab.show();
+        }
+
+        // Удаление клиента
+        async function deleteClient(id) {
+            if (!confirm('Are you sure you want to delete this user?')) {
+                return;
+            }
+
+            try {
+                console.log('Удаляем клиента с ID:', id);
+                const response = await fetch(`/api/clients/${id}`, {
+                    method: 'DELETE'
+                });
+
+                console.log('Статус ответа при удалении:', response.status);
+                
+                if (response.ok) {
+                    showAlert('Клиент удален успешно', 'success');
+                    loadClients();
+                } else {
+                    let errorMessage = `Ошибка удаления клиента (статус: ${response.status})`;
+                    try {
+                        const errorText = await response.text();
+                        console.log('Ошибка удаления:', errorText);
+                        if (errorText) {
+                            errorMessage += `: ${errorText}`;
+                        }
+                    } catch (e) {
+                        console.log('Не удалось прочитать текст ошибки');
+                    }
+                    
+                    if (response.status === 403) {
+                        errorMessage = 'У вас нет прав для удаления клиентов';
+                    } else if (response.status === 404) {
+                        errorMessage = 'Клиент не найден';
+                    } else if (response.status === 500) {
+                        errorMessage = 'Внутренняя ошибка сервера при удалении клиента';
+                    }
+                    
+                    showAlert(errorMessage, 'danger');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showAlert('Ошибка удаления клиента: ' + error.message, 'danger');
+            }
+        }
+
+        // Сброс формы
+        function resetForm() {
+            editingClientId = null;
+            document.getElementById('clientForm').reset();
+            document.getElementById('password').required = true;
+            
+            // Возвращаем кнопку в исходное состояние
+            const submitBtn = document.getElementById('submitBtn');
+            if (submitBtn) {
+                submitBtn.textContent = 'Add new user';
+                submitBtn.className = 'btn btn-success';
+            }
+        }
+
+        // Показ уведомлений
+        function showAlert(message, type) {
+            // Удаляем существующие уведомления
+            const existingAlerts = document.querySelectorAll('.alert');
+            existingAlerts.forEach(alert => alert.remove());
+
+            // Создаем новое уведомление
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            // Вставляем уведомление в начало контента
+            const contentCard = document.querySelector('.content-card');
+            contentCard.insertBefore(alertDiv, contentCard.firstChild);
+
+            // Автоматически скрываем через 5 секунд
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+    </script>
 </body>
 </html>

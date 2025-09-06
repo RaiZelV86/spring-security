@@ -1,7 +1,6 @@
 package com.security.SpringSecurity.service;
 
 import com.security.SpringSecurity.model.Client;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
