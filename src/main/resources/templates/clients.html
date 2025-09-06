@@ -151,12 +151,10 @@
             }
 
             try {
-                console.log('Удаляем клиента с ID:', id);
                 const response = await fetch(`/api/clients/${id}`, {
                     method: 'DELETE'
                 });
 
-                console.log('Статус ответа при удалении:', response.status);
                 
                 if (response.ok) {
                     showAlert('Клиент удален успешно', 'success');
@@ -165,12 +163,10 @@
                     let errorMessage = `Ошибка удаления клиента (статус: ${response.status})`;
                     try {
                         const errorText = await response.text();
-                        console.log('Ошибка удаления:', errorText);
                         if (errorText) {
                             errorMessage += `: ${errorText}`;
                         }
                     } catch (e) {
-                        console.log('Не удалось прочитать текст ошибки');
                     }
                     
                     if (response.status === 403) {

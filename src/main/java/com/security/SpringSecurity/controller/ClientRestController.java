@@ -51,7 +51,6 @@ public class ClientRestController {
     @PostMapping
     public ResponseEntity<Client> createClient(@Valid @RequestBody Client client) {
         try {
-            // Если указана роль, добавляем её
             if (client.getRoles() != null && !client.getRoles().isEmpty()) {
                 Set<Role> roles = client.getRoles();
                 for (Role role : roles) {
@@ -78,7 +77,6 @@ public class ClientRestController {
                 return ResponseEntity.notFound().build();
             }
             
-            // Обновляем поля
             existingClient.setUserName(client.getUserName());
             existingClient.setLastName(client.getLastName());
             existingClient.setAge(client.getAge());
@@ -87,7 +85,6 @@ public class ClientRestController {
                 existingClient.setPassword(client.getPassword());
             }
             
-            // Обновляем роли
             if (client.getRoles() != null) {
                 existingClient.setRoles(client.getRoles());
             }
@@ -102,19 +99,14 @@ public class ClientRestController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteClient(@PathVariable Long id) {
         try {
-            System.out.println("Попытка удаления клиента с ID: " + id);
             Client client = clientService.getClientById(id);
             if (client == null) {
-                System.out.println("Клиент с ID " + id + " не найден");
                 return ResponseEntity.notFound().build();
             }
             
-            System.out.println("Удаляем клиента: " + client.getUserName() + " " + client.getLastName());
             clientService.deleteClientById(id);
-            System.out.println("Клиент успешно удален");
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
-            System.err.println("Ошибка при удалении клиента с ID " + id + ": " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }

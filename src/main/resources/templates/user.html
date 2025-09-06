@@ -101,19 +101,14 @@
         // Загрузка информации о текущем пользователе
         async function loadCurrentUser() {
             try {
-                console.log('Загружаем информацию о пользователе...');
                 const response = await fetch('/api/user/current');
-                console.log('Статус ответа:', response.status);
                 
                 if (response.ok) {
                     currentUser = await response.json();
-                    console.log('Получены данные пользователя:', currentUser);
                     renderUserInfo();
                 } else if (response.status === 404) {
-                    console.log('Пользователь не найден (404)');
                     showAlert('Пользователь не найден. Возможно, вы не авторизованы.', 'warning');
                 } else {
-                    console.log('Ошибка сервера:', response.status);
                     showAlert('Ошибка загрузки информации о пользователе (статус: ' + response.status + ')', 'danger');
                 }
             } catch (error) {
