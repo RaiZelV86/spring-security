@@ -33,3 +33,4 @@ build/
 .vscode/
 *.log
 target/
+.PVS-Studio/
