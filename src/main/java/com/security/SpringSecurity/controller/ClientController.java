@@ -40,7 +40,6 @@ public class ClientController {
                              @RequestParam(value = "role", required = false) String roleName) {
         if (result.hasErrors()) return "form";
         
-        // Если указана роль, добавляем её
         if (roleName != null && !roleName.isEmpty()) {
             Role role = roleRepo.findByName(roleName);
             if (role != null) {

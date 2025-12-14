@@ -24,7 +24,7 @@ public class UserRestController {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
-                String email = auth.getName(); // В Spring Security это обычно email/username
+                String email = auth.getName();
                 Client currentUser = clientService.findAll().stream()
                     .filter(client -> client.getEmail().equals(email))
                     .findFirst()
@@ -39,7 +39,7 @@ public class UserRestController {
                 return ResponseEntity.notFound().build();
             }
         } catch (Exception e) {
-            e.printStackTrace(); // Для отладки
+            e.printStackTrace();
             return ResponseEntity.status(500).build();
         }
     }
