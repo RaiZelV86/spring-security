@@ -101,7 +101,6 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <!-- Данные будут загружены через JavaScript -->
                                     </tbody>
                                 </table>
                             </div>
@@ -155,12 +154,10 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Глобальные переменные
         let clients = [];
         let roles = [];
         let editingClientId = null;
 
-        // Инициализация при загрузке страницы
         document.addEventListener('DOMContentLoaded', function() {
             loadClients();
             loadRoles();
@@ -168,12 +165,12 @@
             handleUrlHash();
         });
 
-        // Загрузка списка клиентов
         async function loadClients() {
             try {
                 const response = await fetch('/api/clients');
                 if (response.ok) {
                     clients = await response.json();
+                    console.log(clients)
                     renderClientsTable();
                 } else {
                     showAlert('Ошибка загрузки клиентов', 'danger');
@@ -184,7 +181,6 @@
             }
         }
 
-        // Загрузка ролей
         async function loadRoles() {
             try {
                 const response = await fetch('/api/clients/roles');
@@ -197,15 +193,12 @@
             }
         }
 
-        // Настройка обработчиков событий
         function setupEventListeners() {
-            // Обработчик формы добавления/редактирования клиента
             const clientForm = document.getElementById('clientForm');
             if (clientForm) {
                 clientForm.addEventListener('submit', handleClientSubmit);
             }
 
-            // Обработчик кнопки "Add new user"
             const newUserTab = document.getElementById('new-user-tab');
             if (newUserTab) {
                 newUserTab.addEventListener('click', function() {
@@ -214,13 +207,11 @@
             }
         }
 
-        // Обработка хеша в URL для редактирования
         function handleUrlHash() {
             const hash = window.location.hash;
             if (hash && hash.startsWith('#edit-')) {
                 const clientId = parseInt(hash.replace('#edit-', ''));
                 if (!isNaN(clientId)) {
-                    // Ждем загрузки данных, затем редактируем
                     setTimeout(() => {
                         editClient(clientId);
                     }, 500);
@@ -228,7 +219,6 @@
             }
         }
 
-        // Рендеринг таблицы клиентов
         function renderClientsTable() {
             const tbody = document.querySelector('#clientsTable tbody');
             if (!tbody) return;
@@ -255,7 +245,6 @@
             });
         }
 
-        // Заполнение селекта ролей
         function populateRoleSelect() {
             const roleSelect = document.getElementById('role');
             if (!roleSelect) return;
@@ -269,7 +258,6 @@
             });
         }
 
-        // Обработка отправки формы
         async function handleClientSubmit(event) {
             event.preventDefault();
             
@@ -283,7 +271,6 @@
                 roles: []
             };
 
-            // Добавляем роль если выбрана
             const selectedRole = formData.get('role');
             if (selectedRole) {
                 const role = roles.find(r => r.name === selectedRole);
@@ -295,7 +282,6 @@
             try {
                 let response;
                 if (editingClientId) {
-                    // Обновление существующего клиента
                     response = await fetch(`/api/clients/${editingClientId}`, {
                         method: 'PUT',
                         headers: {
@@ -304,7 +290,6 @@
                         body: JSON.stringify(clientData)
                     });
                 } else {
-                    // Создание нового клиента
                     response = await fetch('/api/clients', {
                         method: 'POST',
                         headers: {
@@ -318,7 +303,6 @@
                     showAlert(editingClientId ? 'Клиент обновлен успешно' : 'Клиент создан успешно', 'success');
                     resetForm();
                     loadClients();
-                    // Переключаемся на вкладку "All Users"
                     const allUsersTab = new bootstrap.Tab(document.getElementById('all-users-tab'));
                     allUsersTab.show();
                 } else {
@@ -330,14 +314,12 @@
             }
         }
 
-        // Редактирование клиента
         function editClient(id) {
             const client = clients.find(c => c.id === id);
             if (!client) return;
 
             editingClientId = id;
             
-            // Заполняем форму данными клиента
             document.getElementById('userName').value = client.userName;
             document.getElementById('lastName').value = client.lastName;
             document.getElementById('age').value = client.age;
@@ -345,24 +327,20 @@
             document.getElementById('password').value = '';
             document.getElementById('password').required = false;
             
-            // Устанавливаем роль
             if (client.roles && client.roles.length > 0) {
                 document.getElementById('role').value = client.roles[0].name;
             }
 
-            // Обновляем текст кнопки
             const submitBtn = document.getElementById('submitBtn');
             if (submitBtn) {
                 submitBtn.textContent = 'Update User';
                 submitBtn.className = 'btn btn-warning';
             }
 
-            // Переключаемся на вкладку "New User"
             const newUserTab = new bootstrap.Tab(document.getElementById('new-user-tab'));
             newUserTab.show();
         }
 
-        // Удаление клиента
         async function deleteClient(id) {
             if (!confirm('Are you sure you want to delete this user?')) {
                 return;
@@ -403,13 +381,11 @@
             }
         }
 
-        // Сброс формы
         function resetForm() {
             editingClientId = null;
             document.getElementById('clientForm').reset();
             document.getElementById('password').required = true;
             
-            // Возвращаем кнопку в исходное состояние
             const submitBtn = document.getElementById('submitBtn');
             if (submitBtn) {
                 submitBtn.textContent = 'Add new user';
@@ -417,13 +393,10 @@
             }
         }
 
-        // Показ уведомлений
         function showAlert(message, type) {
-            // Удаляем существующие уведомления
             const existingAlerts = document.querySelectorAll('.alert');
             existingAlerts.forEach(alert => alert.remove());
 
-            // Создаем новое уведомление
             const alertDiv = document.createElement('div');
             alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
             alertDiv.innerHTML = `
@@ -431,11 +404,9 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             `;
 
-            // Вставляем уведомление в начало контента
             const contentCard = document.querySelector('.content-card');
             contentCard.insertBefore(alertDiv, contentCard.firstChild);
 
-            // Автоматически скрываем через 5 секунд
             setTimeout(() => {
                 if (alertDiv.parentNode) {
                     alertDiv.remove();
