@@ -1,33 +1,90 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .register-form {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+        .form-control {
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            padding: 10px 15px;
+        }
+        .btn-primary {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+            padding: 10px 20px;
+            width: 100%;
+        }
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0b5ed7;
+        }
+        .invalid-feedback {
+            display: block;
+        }
+    </style>
 </head>
 <body>
-<h2>Registration</h2>
-<form th:action="@{/register}" th:object="${client}" method="post">
-    <label>Surname:</label>
-    <input type="text" th:field="*{userName}" />
-    <div style="color: red" th:if="${#fields.hasErrors('userName')}" th:errors="*{userName}">Error</div>
+    <div class="register-form">
+        <h2 class="text-center mb-4 text-muted">Registration</h2>
+        
+        <form th:action="@{/register}" th:object="${client}" method="post">
+            <div class="mb-3">
+                <label for="userName" class="form-label">First Name</label>
+                <input type="text" class="form-control" id="userName" th:field="*{userName}" required>
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('userName')}" th:errors="*{userName}"></div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="lastName" class="form-label">Last Name</label>
+                <input type="text" class="form-control" id="lastName" th:field="*{lastName}" required>
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" th:field="*{email}" required>
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="age" class="form-label">Age</label>
+                <input type="number" class="form-control" id="age" th:field="*{age}" required>
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('age')}" th:errors="*{age}"></div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" th:field="*{password}" required>
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Register</button>
+        </form>
+        
+        <div class="text-center mt-3">
+            <p class="mb-0">Already have an account? <a th:href="@{/login}" class="text-decoration-none">Login</a></p>
+        </div>
+    </div>
 
-    <label>Lastname:</label>
-    <input type="text" th:field="*{lastName}" />
-    <div style="color: red" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}">Error</div>
-
-    <label>Email:</label>
-    <input type="email" th:field="*{email}" />
-    <div style="color: red" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Error</div>
-
-    <label>Age:</label>
-    <input type="number" th:field="*{age}" />
-    <div style="color: red" th:if="${#fields.hasErrors('age')}" th:errors="*{age}">Error</div>
-
-    <label>Password:</label>
-    <input type="password" th:field="*{password}" />
-    <div style="color: red" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Error</div>
-
-    <button type="submit">Register</button>
-</form>
-<p>Already have an account? <a th:href="@{/login}">Login</a></p>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html> 

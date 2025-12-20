@@ -32,7 +32,6 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public void saveClient(Client client) {
-        // Хэшируем пароль перед сохранением
         client.setPassword(passwordEncoder.encode(client.getPassword()));
         clientRepository.save(client);
     }

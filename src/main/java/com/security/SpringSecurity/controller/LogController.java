@@ -41,7 +41,6 @@ public class LogController {
     public String processRegistration(@Valid @ModelAttribute("client") Client client,
                                       BindingResult result) {
         if (result.hasErrors()) return "register";
-        // Назначаем роль USER
         Role userRole = roleRepo.findByName("ROLE_USER");
         client.getRoles().add(userRole);
         clientService.saveClient(client);

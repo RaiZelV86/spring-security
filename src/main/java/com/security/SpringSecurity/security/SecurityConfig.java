@@ -18,10 +18,15 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http, DaoAuthenticationProvider authProvider) throws Exception {
         http
                 .authenticationProvider(authProvider)
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/api/**")
+                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/clients/**").hasRole("ADMIN")
                         .requestMatchers("/user").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/clients/**").hasRole("ADMIN")
+                        .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
                         .anyRequest().permitAll()
                 )
                 .formLogin(form -> form
