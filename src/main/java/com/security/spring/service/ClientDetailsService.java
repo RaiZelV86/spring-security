@@ -1,7 +1,7 @@
-package com.security.SpringSecurity.service;
+package com.security.spring.service;
 
-import com.security.SpringSecurity.model.Client;
-import com.security.SpringSecurity.repository.ClientRepository;
+import com.security.spring.model.Client;
+import com.security.spring.repository.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

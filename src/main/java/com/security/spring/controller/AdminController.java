@@ -1,6 +1,5 @@
-package com.security.SpringSecurity.controller;
+package com.security.spring.controller;
 
-import com.security.SpringSecurity.model.Client;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;

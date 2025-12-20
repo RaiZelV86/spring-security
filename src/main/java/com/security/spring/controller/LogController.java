@@ -1,9 +1,9 @@
-package com.security.SpringSecurity.controller;
+package com.security.spring.controller;
 
-import com.security.SpringSecurity.model.Client;
-import com.security.SpringSecurity.model.Role;
-import com.security.SpringSecurity.repository.RoleRepo;
-import com.security.SpringSecurity.service.ClientService;
+import com.security.spring.model.Client;
+import com.security.spring.model.Role;
+import com.security.spring.repository.RoleRepo;
+import com.security.spring.service.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

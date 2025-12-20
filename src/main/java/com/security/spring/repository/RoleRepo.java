@@ -1,6 +1,6 @@
-package com.security.SpringSecurity.repository;
+package com.security.spring.repository;
 
-import com.security.SpringSecurity.model.Role;
+import com.security.spring.model.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 

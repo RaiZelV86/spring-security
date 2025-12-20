@@ -1,4 +1,4 @@
-package com.security.SpringSecurity.model;
+package com.security.spring.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,10 +17,8 @@ import jakarta.validation.constraints.Size;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -29,12 +27,12 @@ public class Client implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Column(nullable = false)
-    @NotBlank(message = "Username must not be empty")
-    @Size(min = 3, max = 30, message = "The surname must be between 3 and 30 characters.")
-    private String userName;
+    @NotBlank(message = "First name must not be empty")
+    @Size(min = 3, max = 30, message = "The first name must be between 3 and 30 characters.")
+    private String firstName;
 
     @Column(nullable = false)
     @NotBlank(message = "Lastname must not be empty")
@@ -49,10 +47,10 @@ public class Client implements UserDetails {
     private String email;
 
     @NotBlank(message = "Password must not be empty")
-    @Size(min = 6, message = "Password must be at least 6 characters long")
+    @Size(min = 6, message = "Password must be at least 6 characters Long")
     private String password;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "clients_roles",
             joinColumns = @JoinColumn(name = "client_id"),
@@ -62,21 +60,21 @@ public class Client implements UserDetails {
 
     public Client() {}
 
-    public Client(long id, String userName, String lastName, int age, String email, String password) {
+    public Client(Long id, String firstName, String lastName, int age, String email, String password) {
         this.id = id;
-        this.userName = userName;
+        this.firstName = firstName;
         this.lastName = lastName;
         this.age = age;
         this.email = email;
         this.password = password;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getFirstName() {
+        return firstName;
     }
 
     public String getLastName() {
@@ -131,12 +129,12 @@ public class Client implements UserDetails {
     }
 
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
     public void setLastName(String lastName) {

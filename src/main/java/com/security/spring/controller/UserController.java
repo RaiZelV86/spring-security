@@ -1,6 +1,6 @@
-package com.security.SpringSecurity.controller;
+package com.security.spring.controller;
 
-import com.security.SpringSecurity.model.Client;
+import com.security.spring.model.Client;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
